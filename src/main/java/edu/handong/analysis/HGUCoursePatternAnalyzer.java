@@ -1,14 +1,17 @@
 package edu.handong.analysis;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Set;
+import java.io.File;
 
 import edu.handong.analysis.datamodel.Course;
 import edu.handong.analysis.datamodel.Student;
-import edu.handong.analysise.utils.NotEnoughArgumentException;
-import edu.handong.analysise.utils.Utils;
+import edu.handong.analysis.utils.NotEnoughArgumentException;
+import edu.handong.analysis.utils.Utils;
 
 public class HGUCoursePatternAnalyzer {
 
@@ -23,12 +26,18 @@ public class HGUCoursePatternAnalyzer {
 		
 		try {
 			// when there are not enough arguments from CLI, it throws the NotEnoughArgmentException which must be defined by you.
-			if(args.length<2)
+			File path = new File(args[0]);
+			if(args.length < 2)
 				throw new NotEnoughArgumentException();
+			else if(!path.exists() || path.isDirectory())
+				throw new Exception("The file path does not exist. Please check your CLI argument!");
 		} catch (NotEnoughArgumentException e) {
 			System.out.println(e.getMessage());
 			System.exit(0);
-		}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.exit(0);
+		} 
 		
 		String dataPath = args[0]; // csv file to be analyzed
 		String resultPath = args[1]; // the file path where the results are saved.
@@ -53,10 +62,21 @@ public class HGUCoursePatternAnalyzer {
 	 * @return
 	 */
 	private HashMap<String,Student> loadStudentCourseRecords(ArrayList<String> lines) {
-		
 		// TODO: Implement this method
+		HashMap<String,Student> studentInfo = new HashMap<String,Student>();
 		
-		return null; // do not forget to return a proper variable.
+		for(String information : lines) {
+			String studentId = information.split(",")[0].trim();
+			
+			if(studentInfo.containsKey(studentId))
+				studentInfo.get(studentId).addCourse(new Course(information));
+			else {
+				Student newStudent = new Student(studentId);
+				studentInfo.put(studentId, newStudent);
+				studentInfo.get(studentId).addCourse(new Course(information));
+			}
+		}
+		return studentInfo; // do not forget to return a proper variable.
 	}
 
 	/**
@@ -73,9 +93,21 @@ public class HGUCoursePatternAnalyzer {
 	 * @return
 	 */
 	private ArrayList<String> countNumberOfCoursesTakenInEachSemester(Map<String, Student> sortedStudents) {
-		
 		// TODO: Implement this method
 		
-		return null; // do not forget to return a proper variable.
+		ArrayList<String> infoOfEachSemester = new ArrayList<String>();
+		
+		for(Student studentInfo : sortedStudents.values()) {
+			Map<String,Integer> totalSemesters = new TreeMap<String,Integer>(studentInfo.getSemestersByYearAndSemester());
+			for(Integer number : totalSemesters.values()) {
+				infoOfEachSemester.add(studentInfo.getStudentId() + "," 
+										+ Integer.toString(totalSemesters.values().size()) + ","
+										+ totalSemesters.values() + "," 
+										+ studentInfo.getNumCourseInNthSementer(number));
+			}
+		}
+		
+		
+		return infoOfEachSemester; // do not forget to return a proper variable.
 	}
 }
