@@ -13,7 +13,7 @@ public class Utils {
 		while(!removerHeader) {
 			BufferedInputStream inputStream= new BufferedInputStream(new FileInputStream(new File(file)));
 	        while (inputStream.read()!=-1){
-	        	
+	        	 
 	        }
 			
 		return lines;
